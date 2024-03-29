@@ -24,3 +24,11 @@ class MenuItemsView(generics.ListCreateAPIView):
 @permission_classes([IsAuthenticated])
 def secret(request):
     return Response({"message:some secret message"})
+
+@api_view()
+@permission_classes([IsAuthenticated])
+def manager_view(request):
+    if request.user.groups.filter(name='Manager').exists():
+        return Response({"msg":"Only managers should see this"})
+    else:
+        return Response({"msg":"You're not authorized"},403)
