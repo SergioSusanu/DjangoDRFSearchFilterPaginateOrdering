@@ -1,13 +1,14 @@
 
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework import generics
 from .models import Category, MenuItem
 from .serializers import MenuItemSerializer, CategorySerializer
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from .throttles import TenCallsPerMinutes
+from django.contrib.auth.models import User, Group
 
 # Create your views here.
 class CategoriesView(generics.ListCreateAPIView):
@@ -44,3 +45,19 @@ def throttle_check(request):
 @throttle_classes([TenCallsPerMinutes])
 def throttle_check_auth(request):
     return Response({"msg":"for logged in users only"})
+
+#api endpoint for super admin only that he can assign a user to a group 
+@api_view(['POST', 'DELETE'])
+@permission_classes([IsAdminUser])
+def managers(request):
+    username = request.data['username']
+    if username:
+        user = get_object_or_404(User, username=username)
+        managers = Group.objects.get(name="Manager")
+        if request.method == 'POST':
+            managers.user_set.add(user)
+            return Response({"msg":"user added to manager group"})
+        elif request.method == 'DELETE':
+            managers.user_set.remove(user)
+            return Response({"msg":"user deleted to manager group"})
+    return Response({"msg":"ok"})

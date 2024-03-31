@@ -41,8 +41,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'LittleLemonDRF',
     'djoser',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
